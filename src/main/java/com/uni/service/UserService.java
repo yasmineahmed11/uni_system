@@ -1,6 +1,10 @@
 package com.uni.service;
 
 import com.uni.model.User;
+import com.uni.model.Faculty;
+import com.uni.dto.UserRequest;
+import com.uni.dto.UserResponse;
+import  com.uni.repository.FacultyRepository;
 import com.uni.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,10 +16,12 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepo;
+    private final FacultyRepository facultyRepo;
 
     @Autowired
-    public UserService(UserRepository userRepo){
+    public UserService(UserRepository userRepo, FacultyRepository facultyRepo){
         this.userRepo = userRepo;
+        this.facultyRepo = facultyRepo;
     }
 
     public List<User> getAllUsers(){
@@ -28,9 +34,19 @@ public class UserService {
         return userRepo.findByStudentLevel(studentLevel);
     }
 
-    public User addUser(User user){
+    public User addUser(UserRequest userRequest){
+        User user = new User();
+        user.setStudentName(userRequest.getStudentName());
+        user.setStudentLevel(userRequest.getStudentLevel());
+
+        Faculty faculty = facultyRepo.findById(userRequest.getFacultyId())
+                .orElseThrow(() -> new RuntimeException("Faculty not found"));
+
+        user.setFaculty(faculty);
+
         return userRepo.save(user);
     }
+
     public void deleteUser(Long id){
         userRepo.deleteById(id);
     }
@@ -41,4 +57,18 @@ public class UserService {
             return userRepo.save(existingUser);
         });
     }
+
+    public UserResponse mapToUserResponse(User user) {
+        UserResponse response = new UserResponse();
+        response.setStudentId(user.getId());
+        response.setStudentName(user.getStudentName());
+        response.setStudentLevel(user.getStudentLevel());
+
+        if (user.getFaculty() != null) {
+            response.setFacultyName(user.getFaculty().getFacultyName());
+        }
+
+        return response;
+    }
+
 }

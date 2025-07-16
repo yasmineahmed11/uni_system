@@ -1,6 +1,8 @@
 package com.uni.controller;
 
 import com.uni.model.User;
+import com.uni.dto.UserRequest;
+import com.uni.dto.UserResponse;
 import com.uni.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/students")
 public class UserController {
@@ -21,34 +25,44 @@ public class UserController {
     }
 
     @GetMapping
-    public List<User> getAllUsers(){
-        return userService.getAllUsers();
+    public List<UserResponse> getAllUsers(){
+        return userService.getAllUsers().stream()
+                .map(userService::mapToUserResponse)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id){
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id){
         return userService.getUserById(id)
+                .map(userService::mapToUserResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/level/{studentLevel}")
-    public List<User> getUserByLevel(@PathVariable int studentLevel){
-        return userService.getUserByLevel(studentLevel);
+    public List<UserResponse> getUserByLevel(@PathVariable int studentLevel){
+        return userService.getUserByLevel(studentLevel).stream()
+                .map(userService::mapToUserResponse)
+                .toList();
     }
 
 
 //    new user
-    @PostMapping
-    public ResponseEntity<User> addUser(@Valid  @RequestBody User user){
-        User savedUser = userService.addUser(user);
-        return ResponseEntity.status(201).body(savedUser);
-    }
+@PostMapping("/batch")
+public ResponseEntity<List<UserResponse>> addUsers(@Valid @RequestBody List<UserRequest> userRequests) {
+    List<UserResponse> responses = userRequests.stream()
+            .map(userRequest -> userService.addUser(userRequest))
+            .map(userService::mapToUserResponse)
+            .collect(Collectors.toList());
+    return ResponseEntity.status(201).body(responses);
+}
+
 
 //    update a user or student
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id,@Valid @RequestBody User updatedUser){
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id,@Valid @RequestBody User updatedUser){
         return userService.updateUser(id, updatedUser)
+                .map(userService::mapToUserResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

@@ -1,8 +1,12 @@
 package com.uni.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+
 
 
 @Entity
@@ -20,13 +24,16 @@ public class User {
     @Column(name = "student_name", nullable = false)
     private String studentName;
 
-    @JsonIgnore  //to not show el message
-    @AssertTrue(message = "Student level must be 1 int")
-    public boolean isStudentLevelValid() {
-        return this.studentLevel == 1;
-    }
+//    @JsonIgnore  //to not show el message
+//    @AssertTrue(message = "Student level must be 1 int")
+//    public boolean isStudentLevelValid() {
+//        return this.studentLevel == 1;
+//    }
+    @Min(value = 1, message = "Student level must be at least 1")
+    @Max(value = 4, message = "Student level must be at most 4")
     @Column(name = "student_level", nullable = false)
     private int studentLevel;
+
 
     public  User(){}
 
@@ -56,5 +63,19 @@ public class User {
 
     public void setStudentLevel(Integer student_level) {
         this.studentLevel = student_level;
+    }
+
+//    faculty relationship
+    @ManyToOne
+    @JoinColumn(name = "faculty_id")
+    @JsonBackReference
+    private Faculty faculty;
+
+    public Faculty getFaculty() {
+        return faculty;
+    }
+
+    public void setFaculty(Faculty faculty) {
+        this.faculty = faculty;
     }
 }
