@@ -26,12 +26,19 @@ public class FacultyController {
         return facultyService.getAllFaculties();
     }
 
+//    @GetMapping("/{id}")
+//    public ResponseEntity<Faculty> getFacultyById(@PathVariable Long id) {
+//        return facultyService.getFacultyById(id)
+//                .map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Faculty> getFacultyById(@PathVariable Long id) {
-        return facultyService.getFacultyById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Faculty faculty = facultyService.getFacultyById(id); // this will throw if not found
+        return ResponseEntity.ok(faculty);
     }
+
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping

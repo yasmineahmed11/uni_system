@@ -1,5 +1,6 @@
 package com.uni.service;
 
+import com.uni.exception.ResourceNotFoundException;
 import com.uni.model.Faculty;
 import com.uni.repository.FacultyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +23,15 @@ public class FacultyService {
         return facultyRepository.findAll();
     }
 
-    public Optional<Faculty> getFacultyById(Long id) {
-        return facultyRepository.findById(id);
+//    public Optional<Faculty> getFacultyById(Long id) {
+//        return facultyRepository.findById(id);
+//    }
+
+    public Faculty getFacultyById(Long id) {
+        return facultyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Faculty not found with ID: " + id));
     }
+
 
     public Faculty addFaculty(Faculty faculty) {
         return facultyRepository.save(faculty);
