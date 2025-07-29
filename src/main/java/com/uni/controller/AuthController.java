@@ -8,12 +8,14 @@ import com.uni.repository.AdminRepository;
 import com.uni.service.AdminDetailsService;
 import com.uni.config.JwtService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import java.util.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -28,9 +30,11 @@ public class AuthController {
 
 //    register
 @PostMapping("/register")
-public String register(@RequestBody RegisterRequest request) {
+public ResponseEntity<Map<String, String>> register(@RequestBody RegisterRequest request) {
     if (adminRepository.findByUsername(request.getUsername()).isPresent()) {
-        return "Username already exists";
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of("message", "Username already exists"));
     }
 
     Admin admin = new Admin();
@@ -40,8 +44,11 @@ public String register(@RequestBody RegisterRequest request) {
 
     adminRepository.save(admin);
 
-    return "Admin registered successfully";
+    return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(Map.of("message", "Admin registered successfully"));
 }
+
 
 
 // login
